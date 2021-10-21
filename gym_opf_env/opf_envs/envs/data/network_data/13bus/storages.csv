@@ -1,0 +1,2 @@
+index,node,p_max,s_max,SOC_max,SOC_min,eff_char,eff_dischar,capacity
+s1,9,200,250,100,20,95,90,800
