@@ -4,7 +4,7 @@ Hybrid-RL-MPC4CLR is a python-based software package combing deep reinfocement l
 
 ![Screenshot](images/rl_mpc_environment.png)
 
-Fig. 1. RL-MPC Hybrid Controller Learning Framework
+Fig. 1. RL-MPC Hybrid Controller Learning Framework.
 
 # Installation
 
@@ -91,4 +91,24 @@ To test the trained RL agent, execute the following command from the "...rl_lear
 python rl_controller_rollout.py
 ```
 
-# Examples of Results
+# Examples of Simulation Results
+
+The learning curve of the RL agent is shown below.
+
+![Screenshot](images/rl_agent_learning_curve.png)
+
+Fig. 2. RL Agent Learning Curve. 
+
+The following two figures show the optimal DER dispatch and total load restoartion test outputs of the trained RL-MPC controller for a specific scenario of renewable and load demand profiles and substation power outage begining time.
+
+![Screenshot](images/dispatch_and_restoration.png)
+
+Fig. 3. RL-MPC controller test results for a specific scenario: DER dispatch and aggregate load restoration. 
+
+# Citing The Project
+
+All publications derived from the use of Hybrid-RL-MPC4CLR should cite the following two papers:
+
+1. Abinet Tesfaye Eseye, Xiangyu Zhang, Bernard Knueven, Matthew Reynolds, Weijia Liu, and Wesley Jones, "A Hybrid Reinforcement Learning-MPC Approach for Distribution System Critical Load Restoration," IEEE PES GM 2022. (Accepted). Preprint Link: 
+
+2. Xiangyu Zhang, Abinet Tesfaye Eseye, Matthew Reynolds, Bernard Knueven and Wesley Jones, "Restoring Critical Loads In Resilient Distribution Systems using A Curriculum Learned Controller," IEEE PES GM 2021. DOI: https://doi.org/10.1109/PESGM46819.2021.9637834.
