@@ -1,0 +1,13 @@
+Metadata-Version: 2.1
+Name: rl-mpc-envs
+Version: 0.0.1
+Summary: Hybrid RL-MPC Environment for Learning Power System Reserve Policy to Maximize Load Restoration After Extreme Event.
+Home-page: https://github.nrel.gov/AGM-CSSO/rl_mpc_reserve_policy/tree/Hybrid-RL-MPC4CLR
+Author: Abinet Tesfaye Eseye, Xiangyu Zhang, Bernard Knueven, Matthew Reynolds, Weijia Liu, and Wesley Jones
+Maintainer-email: Wesley.Jones@nrel.gov
+License: Revised BSD
+Platform: UNKNOWN
+Requires-Python: >=3.8
+
+UNKNOWN
+
