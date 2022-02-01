@@ -1,5 +1,5 @@
 """
-This script demonstrates how to call a gym env from a controller.
+Call a gym env from a controller.
 
 Action format:
 0:  End_of_horizon fuel reserve; (-1, 1) -> (0, remaining_fuel_kWh) 
@@ -14,9 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-import opf_envs  
-
-plt.rcParams["font.family"] = "Times New Roman"
+import opf_mpc_envs  
 
 current_dir = os.getcwd()
 
@@ -25,7 +23,7 @@ save_dir = current_dir + "/trained_model_evaluation_results"
 
 class ReservePolicyEnvControllerTester(object):
     """ 
-    A unified controller tester for evaluating RL controller.
+    Tester for evaluating the trained RL-MPC controller.
     """
 
     def __init__(self, config):
@@ -34,10 +32,10 @@ class ReservePolicyEnvControllerTester(object):
 
         Args:
           config: a dictionary. Items include 'env_name' with value of gym environment name: you can use 
-            'ReservePolicy-v0'. 'start_idx' is the starting index of the episode to be simulated. 
-            E.g., 0 is the index for time 07/01 00:00.
+          'RLMPCReservePolicyEnv-v0'. 'start_idx' is the starting index of the episode to be simulated: 
+          e.g., 0 is the index for time 07/01 00:00.
           Example:
-            config = {'env_name': 'ReservePolicy-v0', 'start_idx': 0}
+            config = {'env_name': 'RLMPCReservePolicyEnv-v0', 'start_idx': 0}
         """
 
         env_name, start_idx, init_storage, env_config = self.parse_config(config)
@@ -70,7 +68,7 @@ class ReservePolicyEnvControllerTester(object):
     
     def update_config_and_reset(self, config):
         """ 
-        Update the configuration and reset the environment.
+        Update the configuration and reset the RL-MPC environment.
         """
 
         env_name, start_idx, init_storage, env_config = self.parse_config(config)
@@ -105,9 +103,7 @@ class ReservePolicyEnvControllerTester(object):
         gen_data = np.hstack([results[label].reshape((72, -1)) for label in gen_label])
         time_label = np.array(results['time_stamps']).reshape((72, -1))
         gen_data = np.hstack((time_label, gen_data))
-        #gen_df = pd.DataFrame(gen_data, columns=['time', 'mt_p', 'mt_q', 'st_p', 'st_q', 'pv_p', 'wt_p', 
-        #                                         'mt_remaining_fuel', 'st_soc', 'mt_fuel_reserve', 'st_soc_reserve'])
-
+        
         pv_power = results['pv_power']       
         pv_power_df = pd.DataFrame(pv_power)
         pv_power_df.to_csv(path + '/pv_power_results.csv', index=False)
@@ -154,22 +150,9 @@ class ReservePolicyEnvControllerTester(object):
         reactive_load_df = pd.DataFrame(reactive_load, columns=['load_' + str(x + 1) for x in range(reactive_load.shape[1] )]) 
         reactive_load_df.to_csv(path + '/reactive_load_results.csv', index=False)
 
-    def plot_control_result(self,
-                            process_heat_map=True,
-                            active_power_profile=True,
-                            reactive_power_profile=True,
-                            bus_voltage=True,
-                            remaining_fuel=True,
-                            reserve_level=True,
-                            data_source=None):
-        """ Plot the load restoration process under the control implemented.
-
-        Args:
-          process_heat_map: A Boolean, plot restoration process heat map if true.
-          active_power_profile: A Boolean, plot active power profiles of all generators if true.
-          reactive_power_profile: A  Boolean, plot reactive power profiles of all generators if true.
-          bus_voltage: A Boolean, plot bus voltage profiles of all buses if true.
-          remaining_fuel: A Boolean, plot storage and micro-turbine remaining fueal if true.
+    def plot_control_result(self, data_source=None):
+        """ 
+        Plot the load restoration process under the control implemented.
         """
 
         if data_source is None:
@@ -211,113 +194,98 @@ class ReservePolicyEnvControllerTester(object):
             load_df = pd.read_csv(os.path.join(data_source, 'load_results.csv'))
             load_history = load_df.to_numpy()
 
-        if bus_voltage:
-            lower_vol_limit = 0.95
-            upper_vol_limit = 1.05
-            lb_volts = np.array([lower_vol_limit] * 72)
-            ub_volts = np.array([upper_vol_limit] * 72)
+        # Bus voltage plots:
 
-            plt.figure(figsize=(5, 3), dpi=200)
-            for k in range(voltage_history.shape[0]):
+        lower_vol_limit = 0.95
+        upper_vol_limit = 1.05
+        lb_volts = np.array([lower_vol_limit] * 72)
+        ub_volts = np.array([upper_vol_limit] * 72)
 
-                if '.1' in voltage_bus_names[k]:
-                    color = 'k'
-                elif '.2' in voltage_bus_names[k]:
-                    color = 'r'
-                else:
-                    color = 'b'
+        plt.figure(figsize=(5, 3), dpi=200)
+        for k in range(voltage_history.shape[0]):
 
-                plt.plot(voltage_history[k], linewidth=1, color=color, alpha=0.5, label=voltage_bus_names[k])
-                #if min(voltage_history[k]) < lower_vol_limit:
-                #    print(voltage_history[k][64:])
-                #    print(voltage_bus_names[k])
-                #    print(np.mean(voltage_history[k][64:]))
-                #    print(min(voltage_history[k]))
+            if '.1' in voltage_bus_names[k]:
+                color = 'k'
+            elif '.2' in voltage_bus_names[k]:
+                color = 'r'
+            else:
+                color = 'b'
 
+            plt.plot(voltage_history[k], linewidth=1, color=color, alpha=0.5, label=voltage_bus_names[k])               
             plt.plot(lb_volts, linewidth=1, linestyle='dashed', color='red')
             plt.plot(ub_volts, linewidth=1, linestyle='dashed', color='red')
-
-            self._plot_util('Time', 'Voltages (pu)', start_timestamp, (0.0, 1.06), if_grid=True)
-
-        if active_power_profile:
-            plt.figure(figsize=(5, 3), dpi=200)
-
-            total_generation_p = [np.array([pv_p[idx], wt_p[idx], st_p[idx], mt_p[idx]]).sum(axis=0)
-                                  for idx in range(72)]
-
-            plt.plot(pv_p, color='#DB4437', linewidth=1, alpha=0.95, label='PV')
-            plt.plot(wt_p, color='#4285F4', linewidth=1, alpha=0.95, label='WT')
-            plt.plot(st_p, color='#0F9D58', linewidth=1, alpha=0.95, label='ST')
-            plt.plot(mt_p, color='#F4B400', linewidth=1, alpha=0.95, label='MT')
-
-            plt.plot(total_generation_p, color='k', linewidth=1, alpha=0.8, label='Total Gen')
-
-            self._plot_util('Time', 'Active Power (kW)', start_timestamp, (-200, 800),
-                            'upper left', if_grid=True)
-
-        if reactive_power_profile:
-            plt.figure(figsize=(5, 3), dpi=200)
-
-            total_generation_q = [np.array([st_q[idx], mt_q[idx]]).sum(axis=0)
-                                  for idx in range(72)]
-
-            plt.plot(st_q, color='#0F9D58', linewidth=1, alpha=0.95, label='ST')
-            plt.plot(mt_q, color='#F4B400', linewidth=1, alpha=0.95, label='MT')
-
-            plt.plot(total_generation_q, color='k', linewidth=1, alpha=0.8, label='Total Gen')
-
-            self._plot_util('Time', 'Reactive Power (kvar)', start_timestamp, (-200, 800), 'upper left', if_grid=True)
-
-        if remaining_fuel:
-            plt.figure(figsize=(5, 3), dpi=200)
-
-            plt.plot(mt_fuel, label='MT fuel')
-            plt.plot(st_soc, label='ST SOC')
-            plt.plot([0.128] * len(st_soc), label='ST SOC Minimum', linestyle='dashed', color='red')
-
-            self._plot_util('Time', 'Energy Remained (Normalized)', start_timestamp, (-0.5, 1.05),
-                            'upper center', if_grid=True)
-
-        if reserve_level:
-            plt.figure(figsize=(5, 3), dpi=200)
-
-            plt.plot(mt_fuel_reserve, label='MT fuel reserve')
-            plt.plot(st_soc_reserve, label='ST SOC reserve')
-            
-            self._plot_util('Time', 'Energy Reserved (Normalized)', start_timestamp, (-0.5, 1.05),
-                            'upper center', if_grid=True)
-
-        if process_heat_map:
-            plt.figure(figsize=(5, 3), dpi=200)
-
-            plt.pcolor(load_history.transpose())
-
-            plt.xlabel('Time', fontsize=12)
-            plt.ylabel('Load 1-9, decreasing importance', fontsize=12)
-            plt.tick_params(labelsize=12)
-            plt.xticks(range(0, 73, 12), [str((start_timestamp.hour + int(a / 12)) % 24) +
-                                          ':' + (str(start_timestamp.minute) if start_timestamp.minute > 5
-                                                 else '0' + str(start_timestamp.minute)) for a in range(0, 73, 12)])
-            plt.yticks([x + 0.5 for x in range(self.env.num_of_load) if x % 2 == 0],
-                       [str(a + 1) for a in range(self.env.num_of_load) if a % 2 == 0])
-            plt.tight_layout()
-
+            plt.xlabel('Time')
+            plt.ylabel('Voltages (pu)')
+            plt.legend()
+            plt.grid()
         plt.show()
 
-    @staticmethod
-    def _plot_util(x_content, y_content, start_timestamp, ylim, legend_pos=None, ncol=2, if_grid=False):
+        # Active power plots:
 
-        plt.xlabel(x_content, fontsize=12)
-        plt.ylabel(y_content, fontsize=12)
+        total_generation_p = [np.array([pv_p[idx], wt_p[idx], st_p[idx], mt_p[idx]]).sum(axis=0) 
+                                for idx in range(72)]
+
+        plt.figure(figsize=(5, 3), dpi=200)
+        plt.plot(pv_p, color='#DB4437', linewidth=1, alpha=0.95, label='PV')
+        plt.plot(wt_p, color='#4285F4', linewidth=1, alpha=0.95, label='WT')
+        plt.plot(st_p, color='#0F9D58', linewidth=1, alpha=0.95, label='ST')
+        plt.plot(mt_p, color='#F4B400', linewidth=1, alpha=0.95, label='MT')
+        plt.plot(total_generation_p, color='k', linewidth=1, alpha=0.8, label='Total Gen')
+        plt.xlabel('Time')
+        plt.ylabel('Active Power (kW)')
+        plt.legend()
+        plt.grid()
+        plt.show()        
+
+        # Reactive power plots:
+
+        total_generation_q = [np.array([st_q[idx], mt_q[idx]]).sum(axis=0) 
+                                for idx in range(72)]
+
+        plt.figure(figsize=(5, 3), dpi=200)
+        plt.plot(st_q, color='#0F9D58', linewidth=1, alpha=0.95, label='ST')
+        plt.plot(mt_q, color='#F4B400', linewidth=1, alpha=0.95, label='MT')
+        plt.plot(total_generation_q, color='k', linewidth=1, alpha=0.8, label='Total Gen')
+        plt.xlabel('Time')
+        plt.ylabel('Reactive Power (kvar)')
+        plt.legend()
+        plt.grid()
+        plt.show()
+        
+        # Remaining fuel plots:
+
+        plt.figure(figsize=(5, 3), dpi=200)
+        plt.plot(mt_fuel, label='MT fuel')
+        plt.plot(st_soc, label='ST SOC')
+        plt.plot([0.2] * len(st_soc), label='ST SOC Minimum', linestyle='dashed', color='red')
+        plt.xlabel('Time')
+        plt.ylabel('Energy Remained (Normalized)')
+        plt.legend()
+        plt.grid()
+        plt.show()
+
+        # Reserve level plots:
+
+        plt.figure(figsize=(5, 3), dpi=200)
+        plt.plot(mt_fuel_reserve, label='MT fuel reserve')
+        plt.plot(st_soc_reserve, label='ST SOC reserve')
+        plt.xlabel('Time')
+        plt.ylabel('Energy Reserved (Normalized)')
+        plt.legend()
+        plt.grid()
+        plt.show()  
+
+        # Restored load plots:         
+                
+        plt.figure(figsize=(5, 3), dpi=200)
+        plt.pcolor(load_history.transpose())
+        plt.xlabel('Time', fontsize=12)
+        plt.ylabel('Load 1-9, decreasing priority', fontsize=12)
         plt.tick_params(labelsize=12)
-        plt.xticks(range(0, 73, 12), [str((start_timestamp.hour + int(a / 12)) % 24) +
-                                      ':' + (str(start_timestamp.minute) if start_timestamp.minute > 5
-                                             else '0' + str(start_timestamp.minute)) for a in range(0, 73, 12)])
-        plt.ylim(ylim)
-
-        if legend_pos is not None:
-            plt.legend(loc=legend_pos, ncol=ncol, fontsize=8)
-
+        plt.xticks(range(0, 73, 12), [str((start_timestamp.hour + int(a / 12)) % 24) + 
+                    ':' + (str(start_timestamp.minute) if start_timestamp.minute > 5 
+                        else '0' + str(start_timestamp.minute)) for a in range(0, 73, 12)])
+        plt.yticks([x + 0.5 for x in range(self.env.num_of_load) if x % 2 == 0],
+                       [str(a + 1) for a in range(self.env.num_of_load) if a % 2 == 0])
         plt.tight_layout()
-        if if_grid:
-            plt.grid()
+        plt.show()
