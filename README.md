@@ -1,41 +1,94 @@
-# AGM_grid_resiliency_reserve_policy
+# Hybrid-RL-MPC4CLR Overview
 
-# Dependencies:
+Hybrid-RL-MPC4CLR is a python-based software package combing deep reinfocement learning and model predictive control (MPC) for critical load restoration (CLR) application in distribution grids. 
 
-1. ```pip install tensorflow==2.2.0```
+![Screenshot](images/rl_mpc_environment.png)
 
-2. ```pip install gym```
+Fig. 1. RL-MPC Hybrid Controller Learning Framework
+
+# Installation
+
+- Hybrid-RL-MPC4CLR is a Python package and therefore requires a Python installation. We recommend using Anaconda with the latest Python (https://www.anaconda.com/distribution/).
+
+- Hybrid-RL-MPC4CLR requires a number of Python packages to be installed in your machine. We recommend first to set up an Anaconda environment to install all these packages in one place for this purpose, run the following command from your terminal (or the Anaconda prompt for Windows users):
+
+    ```
+    conda create -n rl-mpc-env python=3.8
+    ```
+    where 'rl-mpc-env' is the name of the Anaconda environment. You can change this name as you would like. 
+
+- Activate the created Anaconda environment, as follows:
+
+    ```
+    conda activate rl-mpc-env
+    ```
+
+- Go to the 'gym_mpc_env' folder (i.e., the folder containing setup.py) and run setup.py to install Hybrid-RL-MPC4CLR into your conda environment. Use the command below from your terminal:
+
+    ```
+    python setup.py develop
+    ```
+
+    You will get a message saying "Finished processing dependencies for rl-mpc-envs==0.0.1" if your installation is successful.
+
+# Requirements
+
+The following packages should also be installed in addition to the packages you installed with the setup.py file.
+
+- RLlib Ray 
+
+    Hybrid-RL-MPC4CLR uses the RLlib Ray libraries for the RL agent training. Use the following commands to install the relevant RLlib Ray libraries:
+
+    ```
+    pip install -U "ray[tune]"  
+    pip install -U "ray[rllib]"  
+    ```
+
+- Optimization solvers for the OPF/MPC Pyomo model. Hybrid-RL-MPC4CLR is tested with XpressMP and CBC solvers as the developed Pyomo model is mixed-integer linear program (MILP). 
+
+    We recommend Hybrid-RL-MPC4CLR users install the open source CBC MILP solver. CBC installation is platform-specific. Use the following command When using Anaconda on Linux and Mac platforms:
+
+    ```
+    conda install -c conda-forge coincbc
+    ```
+
+# Testing The Installation
+
+- To test the functionalities of the opf-mpc (load restoration model) part of the Hybrid-RL-MPC4CLR, run the following commands one-by-one from the "...tests/opf_mpc" sub-directory:
+
+    ```
+    pytest test_bus.py
+    pytest test_branch.py
+    pytest test_load.py
+    pytest test_DER.py
+    pytest test_network_topology.py
+    pytest test_load_restoration.py
+    ```
+
+- To test the functionalities of the rl-mpc learning environment of the Hybrid-RL-MPC4CLR, run the following command from the "...tests" sub-directory:
+
+    ```    
+    pytest test_rl_mpc_env.py
+    ```
 
 
-3. ```pip install ray==1.0.1```
+# Training The RL Agent 
+
+To train the controller (or RL agent) of the Hybrid-RL-MPC4CLR, run the following command from the "...rl_learning" sub-directory:
+
+```
+python train_rl_agent.py --num-cpus num_cpu_cores
+```
+
+where "num_cpu_cores" is the number of CPU cores for parallel training. Its maximum value is the number of CPU cores in your computing machine minus one. For example, if your machine has 8 CPU cores like the MacBookPro15,2 Processor (Quad-Core Intel Core i7), then you can use values 1 to 7 for "num_cpu_cores". The RL agent training will be faster with higher values of "num_cpu_cores".
 
 
-4. ```pip install matplotlib```
+# Testing The Trained Controller 
 
-5. ```conda install pandas```
+To test the trained RL agent, execute the following command from the "...rl_learning" sub-directory:
 
-6. ```pip install numpy==1.19.5```
+```
+python rl_controller_rollout.py
+```
 
-7. ```conda install -c conda-forge Julia``` [This step is for Eagle installation - if you don’t have prior installation]. Visit Julia website for installation on a local machine.
-
-8. ```pip install pyomo ```
-
-9. ```conda install glpk ipopt_bin -c cachemeorg```
-
-10. ```pip install "xpress<8.9"``` [This step is for Eagle installation - to use the xpress solver license with Pyomo]. Make sure if you have the xpressmp license if you would like to use it on a local machine before this step.
-
-11. Install required Julia packages - open a julia session and install the following packages:
-   
-    ```julia> using Pkg```
-
-    ```julia> Pkg.add("PyCall")```
-
-    ```julia> Pkg.add("JuMP")```
-
-    ```julia> Pkg.add("GLPK")```
-
-    ```julia> Pkg.add("CSV")```
-
-    ```julia> Pkg.add("DataFrames")    ```
-
-12. Install our own environment library: Go to 'gym_opf_env' folder (contains setup.py), then use command ```conda develop .```. After this you will see something similar to: ```completed operation for: /lustre/eaglefs/scratch/aeseye/agm_grid_resiliency/rl_reserve_policy/gym_opf_env```. To verify our environment is successfully installed, start a python session, and run ```import opf_envs```, you should see no error, that means you have installed our environment correctly.
+# Examples of Results
