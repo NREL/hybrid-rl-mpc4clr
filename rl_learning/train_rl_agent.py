@@ -39,8 +39,8 @@ if __name__ == "__main__":
     tune.run(
         args.algo,
         name=env_name,     
-        stop={"time_total_s": 3600},  # 1h (3600s) training. Or: stop={"training_iteration": 100}
-        checkpoint_freq=10,
+        stop={"time_total_s": 2*3600},  # 2h (2*3600s) training -- stopping criterion
+        checkpoint_freq=5,
         checkpoint_at_end=True,
         checkpoint_score_attr="episode_reward_mean",
         keep_checkpoints_num=3,
