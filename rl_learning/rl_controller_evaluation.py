@@ -44,7 +44,7 @@ class ReservePolicyEnvControllerTester(object):
 
         self.env = gym.make(env_name)
         self.env.enable_debug(True)
-        self.env_state = self.env.reset(start_idx, init_storage)
+        self.env_state = self.env.reset(start_index=start_idx, init_storage=init_storage)       
         self.episode_finished = False
         self.episode_reward = 0.0
         self.episode_reward_history = []
@@ -201,7 +201,7 @@ class ReservePolicyEnvControllerTester(object):
         lb_volts = np.array([lower_vol_limit] * 72)
         ub_volts = np.array([upper_vol_limit] * 72)
 
-        plt.figure(figsize=(5, 3), dpi=200)
+        plt.figure(figsize=(12, 6), dpi=200)
         for k in range(voltage_history.shape[0]):
 
             if '.1' in voltage_bus_names[k]:
@@ -225,7 +225,7 @@ class ReservePolicyEnvControllerTester(object):
         total_generation_p = [np.array([pv_p[idx], wt_p[idx], st_p[idx], mt_p[idx]]).sum(axis=0) 
                                 for idx in range(72)]
 
-        plt.figure(figsize=(5, 3), dpi=200)
+        plt.figure(figsize=(12, 6), dpi=200)
         plt.plot(pv_p, color='#DB4437', linewidth=1, alpha=0.95, label='PV')
         plt.plot(wt_p, color='#4285F4', linewidth=1, alpha=0.95, label='WT')
         plt.plot(st_p, color='#0F9D58', linewidth=1, alpha=0.95, label='ST')
@@ -242,7 +242,7 @@ class ReservePolicyEnvControllerTester(object):
         total_generation_q = [np.array([st_q[idx], mt_q[idx]]).sum(axis=0) 
                                 for idx in range(72)]
 
-        plt.figure(figsize=(5, 3), dpi=200)
+        plt.figure(figsize=(12, 6), dpi=200)
         plt.plot(st_q, color='#0F9D58', linewidth=1, alpha=0.95, label='ST')
         plt.plot(mt_q, color='#F4B400', linewidth=1, alpha=0.95, label='MT')
         plt.plot(total_generation_q, color='k', linewidth=1, alpha=0.8, label='Total Gen')
@@ -254,38 +254,39 @@ class ReservePolicyEnvControllerTester(object):
         
         # Remaining fuel plots:
 
-        plt.figure(figsize=(5, 3), dpi=200)
+        Cbat = 800  # battery capacity in kWh
+
+        plt.figure(figsize=(12, 6), dpi=200)
         plt.plot(mt_fuel, label='MT fuel')
-        plt.plot(st_soc, label='ST SOC')
-        plt.plot([0.2] * len(st_soc), label='ST SOC Minimum', linestyle='dashed', color='red')
+        plt.plot(Cbat*np.array(st_soc)/100, label='ST SOC')        
         plt.xlabel('Time')
-        plt.ylabel('Energy Remained (Normalized)')
+        plt.ylabel('Energy Remained (kWh)')
         plt.legend()
         plt.grid()
         plt.show()
 
         # Reserve level plots:
 
-        plt.figure(figsize=(5, 3), dpi=200)
+        plt.figure(figsize=(12, 6), dpi=200)
         plt.plot(mt_fuel_reserve, label='MT fuel reserve')
-        plt.plot(st_soc_reserve, label='ST SOC reserve')
+        plt.plot(Cbat*np.array(st_soc_reserve)/100, label='ST SOC reserve')
         plt.xlabel('Time')
-        plt.ylabel('Energy Reserved (Normalized)')
+        plt.ylabel('Energy Reserved (kWh)')
         plt.legend()
         plt.grid()
         plt.show()  
 
-        # Restored load plots:         
+        # Restored load plots:  
+         
+        restored_loads = load_history.transpose() 
+        load_labels = ['Load1', 'Load2', 'Load3', 'Load4', 'Load5', 'Load6', 'Load7', 'Load8', 'Load9']      
                 
-        plt.figure(figsize=(5, 3), dpi=200)
-        plt.pcolor(load_history.transpose())
+        plt.figure(figsize=(12, 6), dpi=200)
+        for l in range(len(restored_loads)):
+            plt.plot(restored_loads[l], label=load_labels[l])
         plt.xlabel('Time', fontsize=12)
-        plt.ylabel('Load 1-9, decreasing priority', fontsize=12)
+        plt.ylabel('Restored Loads (kW) - Priority of Loads decreases from Load1 to 9', fontsize=12)
         plt.tick_params(labelsize=12)
-        plt.xticks(range(0, 73, 12), [str((start_timestamp.hour + int(a / 12)) % 24) + 
-                    ':' + (str(start_timestamp.minute) if start_timestamp.minute > 5 
-                        else '0' + str(start_timestamp.minute)) for a in range(0, 73, 12)])
-        plt.yticks([x + 0.5 for x in range(self.env.num_of_load) if x % 2 == 0],
-                       [str(a + 1) for a in range(self.env.num_of_load) if a % 2 == 0])
-        plt.tight_layout()
+        plt.legend()
+        plt.grid()       
         plt.show()
