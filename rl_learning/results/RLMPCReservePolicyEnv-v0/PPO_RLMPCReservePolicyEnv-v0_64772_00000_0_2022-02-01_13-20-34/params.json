@@ -1,0 +1,6 @@
+{
+  "env": "RLMPCReservePolicyEnv-v0",
+  "ignore_worker_failures": true,
+  "num_gpus": 0,
+  "num_workers": 7
+}
