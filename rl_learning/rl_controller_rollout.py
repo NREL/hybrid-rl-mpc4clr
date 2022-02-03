@@ -67,8 +67,8 @@ if __name__ == "__main__":
     run_class = 'PPO'
     env_id = 'RLMPCReservePolicy-v0'
     checkpoint = os.path.join(current_file_path,
-         'results_hpc/states_including_end_horizon_reserves_updated_action_mapping4/ReservePolicyEnv-v4/PPO_ReservePolicyEnv-v4_a1a96_00000_0_2021-10-24_22-47-17/checkpoint_158/checkpoint-158')
-             
+         'results/RLMPCReservePolicyEnv-v0/PPO_RLMPCReservePolicyEnv-v0_64772_00000_0_2022-02-01_13-20-34/checkpoint_000002/checkpoint-2')
+     
     env = gym.make(env_id)  
     
     register_env(env_id, lambda config: env)
@@ -120,7 +120,7 @@ plt.show()
 # Learning curve plot:
 
 progress = os.path.join(current_file_path,
-                'results_hpc/with_wind_and_pv_Q/ReservePolicyEnv-v0/PPO_ReservePolicyEnv-v0_e88cf_00000_0_2021-10-20_19-55-03/progress.csv')
+                'results/RLMPCReservePolicyEnv-v0/PPO_RLMPCReservePolicyEnv-v0_64772_00000_0_2022-02-01_13-20-34/progress.csv')
 
 progress_df = pd.read_csv(progress)
 
@@ -128,11 +128,15 @@ episode_reward_mean = progress_df['episode_reward_mean']
 
 fig = plt.figure(figsize=(10,5))
 plt.plot(episode_reward_mean, linewidth = 3)
-plt.xticks(range(0, 271, 30), [str(int(c/1)) for c in range(0, 271, 30)], fontsize=15) 
-plt.ylim((-500,50))
 plt.yticks(fontsize=15)
 plt.xlabel("Training Iterations", fontsize=15)
 plt.ylabel("Episode Reward Mean", fontsize=15)
 plt.title("Reserve Policy Learning Curve", fontsize=15)
 plt.grid()
 plt.show()
+
+# Plots control results for the last scenario tested
+
+print("Plot the last scenario tested.")
+
+controller_tester.plot_control_result()
