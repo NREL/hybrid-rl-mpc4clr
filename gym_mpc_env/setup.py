@@ -4,8 +4,6 @@
 #                    for Reserve Policy-Assisted Critical Load Restoration 
 #                    in Distribution Grids 
 # Copyright 2022 National Renewable Energy Laboratory (NREL) 
-# TODO: Add copyright details including contract #, ...
-#  
 # This software is distributed under the Revised BSD License.
 #  ___________________________________________________________________________
 
