@@ -1,6 +1,6 @@
 # Hybrid-RL-MPC4CLR Overview
 
-Hybrid-RL-MPC4CLR is a python-based software package combing deep reinfocement learning and model predictive control (MPC) for critical load restoration (CLR) application in distribution grids. 
+Hybrid-RL-MPC4CLR is a Python-based software package combining deep reinfocement learning and model predictive control (MPC) for critical load restoration (CLR) application in distribution grids. 
 
 ![Screenshot](images/rl_mpc_environment.png)
 
@@ -8,9 +8,9 @@ Fig. 1. RL-MPC Hybrid Controller Learning Framework.
 
 # Installation
 
-- Hybrid-RL-MPC4CLR is a Python package and therefore requires a Python installation. We recommend using Anaconda with the latest Python (https://www.anaconda.com/distribution/).
+- Hybrid-RL-MPC4CLR is a Python package and therefore requires a Python installation.
 
-- Hybrid-RL-MPC4CLR requires a number of Python packages to be installed in your machine. We recommend first to set up an Anaconda environment to install all these packages in one place for this purpose, run the following command from your terminal (or the Anaconda prompt for Windows users):
+- Hybrid-RL-MPC4CLR requires a number of Python packages to be installed in your machine. We recommend first to set up an Anaconda environment, with a Python installation, to install all these packages in one place for this purpose. Run the following command from your terminal (or the Anaconda prompt for Windows users):
 
     ```
     conda create -n rl-mpc-env python=3.8
@@ -33,7 +33,7 @@ Fig. 1. RL-MPC Hybrid Controller Learning Framework.
 
 # Requirements
 
-The following packages should also be installed in addition to the packages you installed with the setup.py file.
+The following packages should also be installed in addition to the packages you have installed with the setup.py file.
 
 - RLlib Ray 
 
@@ -80,8 +80,7 @@ To train the controller (or RL agent) of the Hybrid-RL-MPC4CLR, run the followin
 python train_rl_agent.py --num-cpus num_cpu_cores
 ```
 
-where "num_cpu_cores" is the number of CPU cores for parallel training. Its maximum value is the number of CPU cores in your computing machine minus one. For example, if your machine has 8 CPU cores like the MacBookPro15,2 Processor (Quad-Core Intel Core i7), then you can use values 1 to 7 for "num_cpu_cores". The RL agent training will be faster with higher values of "num_cpu_cores".
-
+where "num_cpu_cores" is the number of CPU cores for parallel training. Its maximum value is the number of CPU cores in your computing machine minus one. For example, if your machine has 8 CPU cores like the MacBookPro15,2 Processor (Quad-Core Intel Core i7), then you can use values 1 to 7 for "num_cpu_cores". The RL agent training will be faster with higher values of "num_cpu_cores". Note that you also need to specify the training stopping criterion and value in the training script (train_rl_agent.py). The stopping criterion can be the training duration ("time_total_s") or the number of training iterations (training_iteration). An output folder ".../rl_learning/results" will be launched during the training process and the training results will be saved there.
 
 # Testing The Trained Controller 
 
@@ -90,6 +89,9 @@ To test the trained RL agent, execute the following command from the "...rl_lear
 ```
 python rl_controller_rollout.py
 ```
+
+This will simulate a trained RL agent saved in the ".../rl_learning/results" sub-directory.
+
 
 # Examples of Simulation Results
 
@@ -109,6 +111,6 @@ Fig. 3. RL-MPC controller test results for a specific scenario: DER dispatch and
 
 All publications derived from the use of Hybrid-RL-MPC4CLR should cite the following two papers:
 
-1. Abinet Tesfaye Eseye, Xiangyu Zhang, Bernard Knueven, Matthew Reynolds, Weijia Liu, and Wesley Jones, "A Hybrid Reinforcement Learning-MPC Approach for Distribution System Critical Load Restoration," IEEE PES GM 2022. (Accepted). Preprint Link: 
+1. Abinet Tesfaye Eseye, Xiangyu Zhang, Bernard Knueven, Matthew Reynolds, Weijia Liu, and Wesley Jones, "A Hybrid Reinforcement Learning-MPC Approach for Distribution System Critical Load Restoration," IEEE PES GM 2022, July 2022. (Accepted). Preprint Link: https://www.nrel.gov/docs/fy22osti/81440.pdf. 
 
-2. Xiangyu Zhang, Abinet Tesfaye Eseye, Matthew Reynolds, Bernard Knueven and Wesley Jones, "Restoring Critical Loads In Resilient Distribution Systems using A Curriculum Learned Controller," IEEE PES GM 2021. DOI: https://doi.org/10.1109/PESGM46819.2021.9637834.
+2. Xiangyu Zhang, Abinet Tesfaye Eseye, Matthew Reynolds, Bernard Knueven and Wesley Jones, "Restoring Critical Loads In Resilient Distribution Systems using A Curriculum Learned Controller," IEEE PES GM 2021, July 2021. DOI: https://doi.org/10.1109/PESGM46819.2021.9637834.
