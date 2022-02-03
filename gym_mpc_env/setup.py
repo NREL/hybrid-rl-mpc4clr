@@ -2,9 +2,9 @@
 #
 # Hybrid-RL-MPC4CLR: Hybrid Reinforcement Learning-Model Predictive Control 
 #                    for Reserve Policy-Assisted Critical Load Restoration 
-#                    in Distribution Grids 
-# Copyright 2022 National Renewable Energy Laboratory (NREL) 
-# This software is distributed under the Revised BSD License.
+#                    in Distribution Grids. 
+# (c) 2022 Alliance for Sustainable Energy, LLC.
+# This software is distributed under the BSD 3-clause license.
 #  ___________________________________________________________________________
 
 
@@ -26,7 +26,7 @@ setup(
     url='https://github.nrel.gov/AGM-CSSO/rl_mpc_reserve_policy/tree/Hybrid-RL-MPC4CLR', # TODO: Update this url when the repo moves to github.com
     author='Abinet Tesfaye Eseye, Xiangyu Zhang, Bernard Knueven, Matthew Reynolds, Weijia Liu, and Wesley Jones',
     maintainer_email='Wesley.Jones@nrel.gov', # TODO: update the email if needed
-    license='Revised BSD',
+    license='BSD 3-clause',
     packages=find_packages(),  
     scripts=[],
     include_package_data=True,
